@@ -13,8 +13,6 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 
-<<<<<<< HEAD
-=======
 #ifdef Q_OS_WIN
 #include "Windows.h"
 #include "winioctl.h"
@@ -40,7 +38,6 @@ LPTSTR szErrorFormat = TEXT("Error %d: %s\n");
 
 
 #endif
->>>>>>> FETCH_HEAD
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -260,6 +257,10 @@ void MainWindow::on_pb_Eject_clicked()
 }
 
 void MainWindow::refreshList(){
+	QVector<QString> selection;
+	foreach (QListWidgetItem * i, ui->usbDrives->selectedItems()) {
+		selection.append(i->text());
+	}
     ui->usbDrives->clear();
 #ifdef Q_OS_WIN
 
@@ -279,9 +280,15 @@ void MainWindow::refreshList(){
         ui->usbDrives->addItem(fileInfo.absoluteFilePath());
     }
 #endif
-	qDebug() << "Refresh";
+	//qDebug() << selection;
+	for(int i = 0; i < ui->usbDrives->count(); i++) {
+
+		if(selection.contains(ui->usbDrives->item(i)->text()))
+			ui->usbDrives->item(i)->setSelected(true);
+	}
 }
 
+#ifdef Q_OS_WIN
 void ReportError(LPTSTR szMsg)
 {
     //_tprintf(szErrorFormat, GetLastError(), szMsg);
@@ -441,3 +448,4 @@ void Usage()
     //qDebug() << "Usage: Eject <drive letter>\n\n");
     return ;
 }
+#endif
