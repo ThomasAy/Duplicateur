@@ -16,6 +16,8 @@ public:
 	explicit Copier(QObject *parent = 0);
 	Copier(QString src, QString dest);
 
+	static bool rmDir(const QString &dirPath);
+
 signals:
 	void finished();
 	void error(QString);
@@ -29,6 +31,7 @@ private:
 	QString _dest;
 
 
+	bool cpDir(const QString &srcPath, const QString &dstPath);
 };
 
 #endif // COPIER_H

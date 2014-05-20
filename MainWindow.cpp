@@ -201,20 +201,14 @@ void MainWindow::on_pushButton_2_clicked()
 		if(msgBox.exec())
 		{
 			qDebug() << "Start erasing";
+			QMessageBox msgBox;
 
-			QDir folder(dest->text());
-			QStringList files = folder.entryList();
-
-			foreach(QString file, files)
+			if(Copier::rmDir(dest->text()))
 			{
-				qDebug() << "removing" << file;
-				if(file.length() > 2)
-				{
-					QFile f(dest->text() + "/" + file);
-					if(f.remove())
-						qDebug() << "Removed file" << file;
-				}
+				msgBox.setText("The volume \"" + dest->text().split("/").last() + "\" have been erased.");
+				msgBox.exec();
 			}
+
 		}
 
 	}
