@@ -9,6 +9,7 @@
 #include <QMainWindow>
 #include <QListWidgetItem>
 #include  <QTime>
+#include <QTimer>
 
 
 
@@ -48,13 +49,16 @@ private slots:
 
 	void on_pb_Eject_clicked();
 
+	void refreshList();
+
 private:
 	Ui::MainWindow *ui;
 	QTime _t;
 	int _nbThreads;
 
 	Progression _p;
-	void refreshList();
+		QTimer _tRefresh;
+
 };
 
 #endif // MAINWINDOW_H

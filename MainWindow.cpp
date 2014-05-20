@@ -10,9 +10,9 @@
 #include <QThread>
 #include <QMessageBox>
 
-
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
+
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
@@ -27,6 +27,11 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->listWidget->setFocus();
 	ui->listWidget->setAcceptDrops(true);
 	_nbThreads = 0;
+
+
+	_tRefresh.setInterval(1000);
+	_tRefresh.start();
+	qDebug() << connect(&_tRefresh, SIGNAL(timeout()), this, SLOT(refreshList()));
 
 }
 
@@ -244,4 +249,5 @@ void MainWindow::refreshList(){
 		ui->usbDrives->addItem(fileInfo.absoluteFilePath());
 	}
 #endif
+	qDebug() << "Refresh";
 }
