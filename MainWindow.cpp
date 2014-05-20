@@ -115,6 +115,12 @@ void MainWindow::on_pushButton_clicked()
 
 	_t.start();
 
+	int size = 0;
+	for(int i = 0; i < ui->listWidget->count(); i++) {
+		size += Copier::calcSize(ui->listWidget->item(i)->text());
+	}
+	qDebug() << "Size :" << size;
+
 	for(int i = 0; i < ui->listWidget->count(); i++) {
 		foreach(QListWidgetItem *dest, ui->usbDrives->selectedItems())
 		{
@@ -208,7 +214,6 @@ void MainWindow::on_pushButton_2_clicked()
 
 			msgBox.setText("The volume \"" + dest->text().split("/").last() + "\" have been erased.");
 			msgBox.exec();
-
 
 		}
 

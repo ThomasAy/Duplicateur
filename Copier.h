@@ -17,6 +17,7 @@ public:
 	Copier(QString src, QString dest);
 
 	static bool rmDir(const QString &dirPath);
+	static int calcSize(const QString &dirPath);
 
 signals:
 	void finished();

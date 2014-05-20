@@ -97,3 +97,27 @@ bool Copier::rmDir(const QString &dirPath)
 	QDir parentDir(QFileInfo(dirPath).path());
 	return parentDir.rmdir(QFileInfo(dirPath).fileName());
 }
+
+int Copier::calcSize(const QString &dirPath)
+{
+	int sizex = 0;
+	QFileInfo str_info(dirPath);
+	if (str_info.isDir())
+	{
+		QDir dir(dirPath);
+		QFileInfoList list = dir.entryInfoList(QDir::Files | QDir::Dirs |  QDir::Hidden | QDir::NoSymLinks | QDir::NoDotAndDotDot);
+		for (int i = 0; i < list.size(); ++i)
+		{
+			QFileInfo fileInfo = list.at(i);
+			if(fileInfo.isDir())
+			{
+				sizex += calcSize(fileInfo.absoluteFilePath());
+			}
+			else
+				sizex += fileInfo.size();
+
+		}
+	}
+	return sizex;
+}
+
