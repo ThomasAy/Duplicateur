@@ -46,12 +46,15 @@ private slots:
 
 	void on_pushButton_2_clicked();
 
+	void on_pb_Eject_clicked();
+
 private:
 	Ui::MainWindow *ui;
 	QTime _t;
 	int _nbThreads;
 
 	Progression _p;
+	void refreshList();
 };
 
 #endif // MAINWINDOW_H
