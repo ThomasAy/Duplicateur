@@ -23,11 +23,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
 #ifdef Q_OS_WIN
 
-    foreach( QFileInfo drive, QDir::drives() )
-     {
-        ui->usbDrives->addItem(drive.absoluteFilePath());
+	foreach( QFileInfo drive, QDir::drives() )
+	{
+		ui->usbDrives->addItem(drive.absoluteFilePath());
 
-     }
+	}
 #else
 
 	QDir dir("/Volumes/");
@@ -39,7 +39,7 @@ MainWindow::MainWindow(QWidget *parent) :
 		ui->usbDrives->addItem(fileInfo.absoluteFilePath());
 	}
 #endif
-    ui->listWidget->setSelectionMode(QAbstractItemView::MultiSelection);
+	ui->listWidget->setSelectionMode(QAbstractItemView::MultiSelection);
 	ui->usbDrives->setSelectionMode(QAbstractItemView::MultiSelection);
 	ui->listWidget->setFocus();
 	ui->listWidget->setAcceptDrops(true);
@@ -198,18 +198,20 @@ void MainWindow::on_pushButton_2_clicked()
 
 		msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
 		msgBox.setDefaultButton(QMessageBox::Cancel);
-		if(msgBox.exec())
+		msgBox.exec();
+		if(msgBox.result() == QDialog::Accepted or msgBox.result() == QMessageBox::Ok)
 		{
 			qDebug() << "Start erasing";
 			QMessageBox msgBox;
 
-			if(Copier::rmDir(dest->text()))
-			{
-				msgBox.setText("The volume \"" + dest->text().split("/").last() + "\" have been erased.");
-				msgBox.exec();
-			}
+			Copier::rmDir(dest->text());
+
+			msgBox.setText("The volume \"" + dest->text().split("/").last() + "\" have been erased.");
+			msgBox.exec();
+
 
 		}
 
 	}
+	qDebug() << "Remove finished";
 }
