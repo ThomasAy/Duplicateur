@@ -277,9 +277,11 @@ void MainWindow::refreshList(){
 
     for (int i = 0; i < list.size(); ++i) {
         QFileInfo fileInfo = list.at(i);
-        ui->usbDrives->addItem(fileInfo.absoluteFilePath());
+		if(fileInfo.absolutePath() != "/" and fileInfo.absolutePath() != "/Volume")
+			ui->usbDrives->addItem(fileInfo.absoluteFilePath());
     }
 #endif
+
 	//qDebug() << selection;
 	for(int i = 0; i < ui->usbDrives->count(); i++) {
 
