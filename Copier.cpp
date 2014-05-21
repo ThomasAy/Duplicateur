@@ -10,16 +10,19 @@
 #include <QProgressBar>
 #include <QMessageBox>
 #include <QLayout>
+#include <QThread>
 
 Copier::Copier(QObject *parent) :
 	QObject(parent)
 {
 }
 
-Copier::Copier(QString src, QString dest)
+Copier::Copier(QString src, QString dest, Progression *window)
 {
 	_src = src;
 	_dest = dest;
+	_window = window;
+	_nbFiles = 1;
 }
 
 void Copier::process(){
@@ -27,33 +30,23 @@ void Copier::process(){
 	{
 		emit error("The file" + _dest + " already exist!");
 	}
-	else if(_src.at(_src.count() - 1) == '/')
+	else// if(_src.at(_src.count() - 1) == '/' or true)
 	{
-		cpDir(_src, _dest + "/" + _src.split("/").at(_src.split("/").count() - 2));
-		qDebug() << _dest << "copy finnished";
-		emit finished();
-	}
-	else
-	{
-		QFile fromFile(_src);
-		QFile toFile(_dest);
-
-
-		if(!fromFile.copy(toFile.fileName()))
+		if(_src.at(_src.count() - 1) == '/')
 		{
-			emit error("An error occur during the copy of the file:" + _dest);
-			emit finished();
+			_nbFiles = countFile(_src);
+			qDebug() << "There is" << _nbFiles;
+			_window->updateProgressBarMax(_src, _nbFiles);
 		}
-
-
-		qDebug() << _dest << "copy finnished";
-		emit finished();
+		cpDir(_src, _dest + "/" + _src.split("/").at(_src.split("/").count() - 2));
 	}
+	qDebug() << _dest << "copy finished";
+	emit finished();
 }
 
 bool Copier::cpDir(const QString &srcPath, const QString &dstPath)
 {
-	qDebug() << "copy from" << srcPath << "to" << dstPath;
+	qDebug() << "copy from" << srcPath << "to" << dstPath << "using cpdir";
 	rmDir(dstPath);
 	QDir parentDstDir(QFileInfo(dstPath).path());
 	if (!parentDstDir.mkdir(QFileInfo(dstPath).fileName()))
@@ -68,6 +61,9 @@ bool Copier::cpDir(const QString &srcPath, const QString &dstPath)
 				return false;
 			}
 		} else if (info.isFile()) {
+			qDebug() << "Copy file" << info.fileName();
+			_window->incrementProgressBar(_src);
+			QThread::msleep(10);
 			if (!QFile::copy(srcItemPath, dstItemPath)) {
 				return false;
 			}
@@ -119,5 +115,29 @@ int Copier::calcSize(const QString &dirPath)
 		}
 	}
 	return sizex;
+}
+
+void Copier::update(qint64 pos)
+{
+	_window->updateProgressBar(_src, pos);
+}
+
+int Copier::countFile(const QString & path, bool b)
+{
+	int suma = 0;
+	QDir dir(path);
+	dir.setFilter(QDir::AllEntries | QDir::NoDotAndDotDot);
+	if(!dir.exists()) {
+		return 1;
+	}
+	QFileInfoList sList = dir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot);
+
+	foreach(QFileInfo ruta, sList){
+		if(ruta.isDir()){
+			suma += countFile(ruta.path() + "/" + ruta.completeBaseName()+"/");
+		}
+		suma++;
+	}
+	return suma;
 }
 

@@ -9,6 +9,8 @@
 #include <QMimeData>
 #include <QThread>
 #include <QMessageBox>
+#include <QFileDialog>
+#include <QTreeView>
 
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
@@ -18,21 +20,13 @@
 #include "winioctl.h"
 #include "tchar.h"
 
-<<<<<<< HEAD
 #include <Setupapi.h>
 
 DEFINE_GUID( GUID_DEVINTERFACE_USB_DISK,
              0x53f56307L, 0xb6bf, 0x11d0, 0x94, 0xf2,
              0x00, 0xa0, 0xc9, 0x1e, 0xfb, 0x8b );
 BOOL EjectVolume(TCHAR cDriveLetter);
-=======
-	foreach( QFileInfo drive, QDir::drives() )
-	{
-		ui->usbDrives->addItem(drive.absoluteFilePath());
 
-	}
-#else
->>>>>>> CheckFreeSpace
 
 HANDLE OpenVolume(TCHAR cDriveLetter);
 BOOL LockVolume(HANDLE hVolume);
@@ -47,7 +41,6 @@ LPTSTR szErrorFormat = TEXT("Error %d: %s\n");
 
 
 #endif
-<<<<<<< HEAD
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -62,14 +55,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->listWidget->setFocus();
     ui->listWidget->setAcceptDrops(true);
     _nbThreads = 0;
-=======
-	ui->listWidget->setSelectionMode(QAbstractItemView::MultiSelection);
-	ui->usbDrives->setSelectionMode(QAbstractItemView::MultiSelection);
-	ui->listWidget->setFocus();
-	ui->listWidget->setAcceptDrops(true);
-	_nbThreads = 0;
->>>>>>> CheckFreeSpace
-
 
 	_tRefresh.setInterval(1000);
 	_tRefresh.start();
@@ -158,7 +143,7 @@ void MainWindow::on_pushButton_clicked()
 			QThread *thread = new QThread;
 			_nbThreads++;
 
-			Copier * c = new Copier(src, dst);
+			Copier * c = new Copier(src, dst, &_p);
 			c->moveToThread(thread);
 			connect(c, SIGNAL(error(QString)), this, SLOT(errorString(QString)));
 			connect(thread, SIGNAL(started()), c, SLOT(process()));
@@ -244,6 +229,7 @@ void MainWindow::on_pushButton_2_clicked()
 			msgBox.exec();
 
 		}
+	}
 }
 
 void MainWindow::on_pb_Eject_clicked()
@@ -271,7 +257,8 @@ void MainWindow::on_pb_Eject_clicked()
     refreshList();
 }
 
-void MainWindow::refreshList(){
+void MainWindow::refreshList()
+{
 	QVector<QString> selection;
 	foreach (QListWidgetItem * i, ui->usbDrives->selectedItems()) {
 		selection.append(i->text());
@@ -302,7 +289,6 @@ void MainWindow::refreshList(){
 		if(selection.contains(ui->usbDrives->item(i)->text()))
 			ui->usbDrives->item(i)->setSelected(true);
 	}
-	qDebug() << "Remove finished";
 }
 
 #ifdef Q_OS_WIN
@@ -466,3 +452,4 @@ void Usage()
     return ;
 }
 #endif
+
