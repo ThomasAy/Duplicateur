@@ -18,12 +18,21 @@
 #include "winioctl.h"
 #include "tchar.h"
 
+<<<<<<< HEAD
 #include <Setupapi.h>
 
 DEFINE_GUID( GUID_DEVINTERFACE_USB_DISK,
              0x53f56307L, 0xb6bf, 0x11d0, 0x94, 0xf2,
              0x00, 0xa0, 0xc9, 0x1e, 0xfb, 0x8b );
 BOOL EjectVolume(TCHAR cDriveLetter);
+=======
+	foreach( QFileInfo drive, QDir::drives() )
+	{
+		ui->usbDrives->addItem(drive.absoluteFilePath());
+
+	}
+#else
+>>>>>>> CheckFreeSpace
 
 HANDLE OpenVolume(TCHAR cDriveLetter);
 BOOL LockVolume(HANDLE hVolume);
@@ -38,6 +47,7 @@ LPTSTR szErrorFormat = TEXT("Error %d: %s\n");
 
 
 #endif
+<<<<<<< HEAD
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -52,6 +62,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->listWidget->setFocus();
     ui->listWidget->setAcceptDrops(true);
     _nbThreads = 0;
+=======
+	ui->listWidget->setSelectionMode(QAbstractItemView::MultiSelection);
+	ui->usbDrives->setSelectionMode(QAbstractItemView::MultiSelection);
+	ui->listWidget->setFocus();
+	ui->listWidget->setAcceptDrops(true);
+	_nbThreads = 0;
+>>>>>>> CheckFreeSpace
 
 
 	_tRefresh.setInterval(1000);
@@ -124,30 +141,36 @@ MainWindow::~MainWindow()
 void MainWindow::on_pushButton_clicked()
 {
 
-    _t.start();
+	_t.start();
 
-    for(int i = 0; i < ui->listWidget->count(); i++) {
-        foreach(QListWidgetItem *dest, ui->usbDrives->selectedItems())
-        {
-            QString src = ui->listWidget->item(i)->text();
-            QString dst = dest->text()+ "/" + QFileInfo(ui->listWidget->item(i)->text()).fileName();
-            qDebug() << "Copy from" << src << "to" << dst;
-            QThread *thread = new QThread;
-            _nbThreads++;
+	int size = 0;
+	for(int i = 0; i < ui->listWidget->count(); i++) {
+		size += Copier::calcSize(ui->listWidget->item(i)->text());
+	}
+	qDebug() << "Size :" << size;
 
-            Copier * c = new Copier(src, dst);
-            c->moveToThread(thread);
-            connect(c, SIGNAL(error(QString)), this, SLOT(errorString(QString)));
-            connect(thread, SIGNAL(started()), c, SLOT(process()));
-            connect(c, SIGNAL(finished()), thread, SLOT(quit()));
-            connect(c, SIGNAL(finished()), c, SLOT(deleteLater()));
-            connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-            connect(thread, SIGNAL(finished()), this, SLOT(on_finnish()));
-            _p.addCopy(src, dst);
-            _p.show();
-            thread->start(QThread::HighPriority);
-        }
-    }
+	for(int i = 0; i < ui->listWidget->count(); i++) {
+		foreach(QListWidgetItem *dest, ui->usbDrives->selectedItems())
+		{
+			QString src = ui->listWidget->item(i)->text();
+			QString dst = dest->text()+ "/" + QFileInfo(ui->listWidget->item(i)->text()).fileName();
+			qDebug() << "Copy from" << src << "to" << dst;
+			QThread *thread = new QThread;
+			_nbThreads++;
+
+			Copier * c = new Copier(src, dst);
+			c->moveToThread(thread);
+			connect(c, SIGNAL(error(QString)), this, SLOT(errorString(QString)));
+			connect(thread, SIGNAL(started()), c, SLOT(process()));
+			connect(c, SIGNAL(finished()), thread, SLOT(quit()));
+			connect(c, SIGNAL(finished()), c, SLOT(deleteLater()));
+			connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+			connect(thread, SIGNAL(finished()), this, SLOT(on_finnish()));
+			_p.addCopy(src, dst);
+			_p.show();
+			thread->start(QThread::HighPriority);
+		}
+	}
 
 
 }
@@ -201,34 +224,26 @@ void MainWindow::errorString(QString str)
 
 void MainWindow::on_pushButton_2_clicked()
 {
-    foreach(QListWidgetItem *dest, ui->usbDrives->selectedItems())
-    {
-        QMessageBox msgBox;
-        msgBox.setText("Information");
-        msgBox.setInformativeText("Are you sure you want to erase all content on " + dest->text());
+	foreach(QListWidgetItem *dest, ui->usbDrives->selectedItems())
+	{
+		QMessageBox msgBox;
+		msgBox.setText("Information");
+		msgBox.setInformativeText("Are you sure you want to erase all content on " + dest->text());
 
-        msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-        msgBox.setDefaultButton(QMessageBox::Cancel);
-        if(msgBox.exec())
-        {
-            qDebug() << "Start erasing";
+		msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+		msgBox.setDefaultButton(QMessageBox::Cancel);
+		msgBox.exec();
+		if(msgBox.result() == QDialog::Accepted or msgBox.result() == QMessageBox::Ok)
+		{
+			qDebug() << "Start erasing";
+			QMessageBox msgBox;
 
-            QDir folder(dest->text());
-            QStringList files = folder.entryList();
+			Copier::rmDir(dest->text());
 
-            foreach(QString file, files)
-            {
-                qDebug() << "removing" << file;
-                if(file.length() > 2)
-                {
-                    QFile f(dest->text() + "/" + file);
-                    if(f.remove())
-                        qDebug() << "Removed file" << file;
-                }
-            }
-        }
+			msgBox.setText("The volume \"" + dest->text().split("/").last() + "\" have been erased.");
+			msgBox.exec();
 
-    }
+		}
 }
 
 void MainWindow::on_pb_Eject_clicked()
@@ -267,7 +282,6 @@ void MainWindow::refreshList(){
     foreach( QFileInfo drive, QDir::drives() )
     {
         ui->usbDrives->addItem(drive.absoluteFilePath());
-
     }
 #else
 
@@ -288,6 +302,7 @@ void MainWindow::refreshList(){
 		if(selection.contains(ui->usbDrives->item(i)->text()))
 			ui->usbDrives->item(i)->setSelected(true);
 	}
+	qDebug() << "Remove finished";
 }
 
 #ifdef Q_OS_WIN

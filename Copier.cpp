@@ -6,6 +6,7 @@
 #include "Copier.h"
 #include <QFile>
 #include <QDebug>
+#include <QDir>
 #include <QProgressBar>
 #include <QMessageBox>
 #include <QLayout>
@@ -22,9 +23,15 @@ Copier::Copier(QString src, QString dest)
 }
 
 void Copier::process(){
-	if(QFile(_dest).exists())
+	if(QFile(_dest).exists() && _src.at(_src.count() - 1) != '/')
 	{
 		emit error("The file" + _dest + " already exist!");
+	}
+	else if(_src.at(_src.count() - 1) == '/')
+	{
+		cpDir(_src, _dest + "/" + _src.split("/").at(_src.split("/").count() - 2));
+		qDebug() << _dest << "copy finnished";
+		emit finished();
 	}
 	else
 	{
@@ -43,3 +50,74 @@ void Copier::process(){
 		emit finished();
 	}
 }
+
+bool Copier::cpDir(const QString &srcPath, const QString &dstPath)
+{
+	qDebug() << "copy from" << srcPath << "to" << dstPath;
+	rmDir(dstPath);
+	QDir parentDstDir(QFileInfo(dstPath).path());
+	if (!parentDstDir.mkdir(QFileInfo(dstPath).fileName()))
+		return false;
+
+	QDir srcDir(srcPath);
+	foreach(const QFileInfo &info, srcDir.entryInfoList(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot)) {
+		QString srcItemPath = srcPath + "/" + info.fileName();
+		QString dstItemPath = dstPath + "/" + info.fileName();
+		if (info.isDir()) {
+			if (!cpDir(srcItemPath, dstItemPath)) {
+				return false;
+			}
+		} else if (info.isFile()) {
+			if (!QFile::copy(srcItemPath, dstItemPath)) {
+				return false;
+			}
+		} else {
+			qDebug() << "Unhandled item" << info.filePath() << "in cpDir";
+		}
+	}
+	return true;
+}
+
+bool Copier::rmDir(const QString &dirPath)
+{
+	QDir dir(dirPath);
+	if (!dir.exists())
+		return true;
+	foreach(const QFileInfo &info, dir.entryInfoList(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot)) {
+		if (info.isDir()) {
+			if (!rmDir(info.filePath()))
+				return false;
+		} else {
+			if (!dir.remove(info.fileName()))
+				return false;
+			else
+				qDebug() << "Removed" << info.fileName();
+		}
+	}
+	QDir parentDir(QFileInfo(dirPath).path());
+	return parentDir.rmdir(QFileInfo(dirPath).fileName());
+}
+
+int Copier::calcSize(const QString &dirPath)
+{
+	int sizex = 0;
+	QFileInfo str_info(dirPath);
+	if (str_info.isDir())
+	{
+		QDir dir(dirPath);
+		QFileInfoList list = dir.entryInfoList(QDir::Files | QDir::Dirs |  QDir::Hidden | QDir::NoSymLinks | QDir::NoDotAndDotDot);
+		for (int i = 0; i < list.size(); ++i)
+		{
+			QFileInfo fileInfo = list.at(i);
+			if(fileInfo.isDir())
+			{
+				sizex += calcSize(fileInfo.absoluteFilePath());
+			}
+			else
+				sizex += fileInfo.size();
+
+		}
+	}
+	return sizex;
+}
+

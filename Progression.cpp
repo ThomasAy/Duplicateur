@@ -26,9 +26,9 @@ Progression::~Progression()
 
 void Progression::addCopy(QString src, QString dest){
 	qDebug() << "add a copy";
-	QLabel label(dest, this);
-	QProgressBar prog;
-	prog.setMaximum(QFile(src).size());
-	vbl->addWidget(&label);
-	vbl->addWidget(&prog);
+	QLabel * label = new QLabel(dest, this);
+	QProgressBar * prog = new QProgressBar(this);
+	prog->setMaximum(QFile(src).size());
+	vbl->addWidget(label);
+	vbl->addWidget(prog);
 }
