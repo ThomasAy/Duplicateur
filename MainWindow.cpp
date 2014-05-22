@@ -537,3 +537,15 @@ void MainWindow::on_radio_folder_no_clicked()
 	ui->new_folder->setEnabled(false);
 }
 
+
+void MainWindow::on_actionAbout_triggered()
+{
+	QMessageBox msg;
+	msg.setText(QString("The application have been coded by :\n\t Thomas Ayoub, Pierrick Akosz.\n\n")+
+				QString("The fantastic design is the masterpiece of :\n\t Océane Deflandre and Yanis Boulaouinat.\n\n")+
+				QString("Under the direction of the incredible project manager :\n\t Damien Neri."));
+	msg.setStandardButtons(QMessageBox::Ok);
+	msg.setButtonText(QMessageBox::Ok, "Youpi!");
+	msg.setDefaultButton(QMessageBox::Ok);
+	msg.exec();
+}

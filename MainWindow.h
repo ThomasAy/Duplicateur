@@ -59,6 +59,8 @@ private slots:
 
 	void on_radio_folder_no_clicked();
 
+	void on_actionAbout_triggered();
+
 private:
 	Ui::MainWindow *ui;
 	QTime _t;

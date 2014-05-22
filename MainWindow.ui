@@ -14,213 +14,126 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>EasyKey by G4</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QListWidget" name="usbDrives">
+   <widget class="QWidget" name="">
     <property name="geometry">
      <rect>
-      <x>460</x>
-      <y>30</y>
-      <width>256</width>
-      <height>341</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QListWidget" name="listWidget">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>30</y>
-      <width>256</width>
-      <height>341</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
+      <x>20</x>
       <y>10</y>
-      <width>62</width>
-      <height>16</height>
+      <width>731</width>
+      <height>531</height>
      </rect>
     </property>
-    <property name="text">
-     <string>Input</string>
-    </property>
-    <property name="scaledContents">
-     <bool>true</bool>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_2">
-    <property name="geometry">
-     <rect>
-      <x>460</x>
-      <y>10</y>
-      <width>62</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Output</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pushButton">
-    <property name="geometry">
-     <rect>
-      <x>310</x>
-      <y>410</y>
-      <width>114</width>
-      <height>32</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Copy</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pb_Select">
-    <property name="geometry">
-     <rect>
-      <x>600</x>
-      <y>380</y>
-      <width>114</width>
-      <height>32</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Select All</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pb_Clear">
-    <property name="geometry">
-     <rect>
-      <x>170</x>
-      <y>380</y>
-      <width>114</width>
-      <height>32</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Clear</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pushButton_2">
-    <property name="geometry">
-     <rect>
-      <x>600</x>
-      <y>420</y>
-      <width>114</width>
-      <height>32</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Erase selected</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pb_Eject">
-    <property name="geometry">
-     <rect>
-      <x>470</x>
-      <y>380</y>
-      <width>114</width>
-      <height>32</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Eject selected</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pb_browse">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>380</y>
-      <width>91</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Browse files</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pb_browse_folders">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>420</y>
-      <width>91</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Browse folders</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="address_mail">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>460</y>
-      <width>251</width>
-      <height>20</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_3">
-    <property name="geometry">
-     <rect>
-      <x>480</x>
-      <y>460</y>
-      <width>101</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Create new folder(s)</string>
-    </property>
-   </widget>
-   <widget class="QRadioButton" name="radio_folder_yes">
-    <property name="geometry">
-     <rect>
-      <x>590</x>
-      <y>460</y>
-      <width>41</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>yes</string>
-    </property>
-   </widget>
-   <widget class="QRadioButton" name="radio_folder_no">
-    <property name="geometry">
-     <rect>
-      <x>650</x>
-      <y>460</y>
-      <width>41</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>no</string>
-    </property>
-    <property name="checked">
-     <bool>true</bool>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="new_folder">
-    <property name="enabled">
-     <bool>false</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>480</x>
-      <y>490</y>
-      <width>231</width>
-      <height>20</height>
-     </rect>
-    </property>
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="2" column="5" rowspan="2" colspan="2">
+      <widget class="QPushButton" name="pb_Select">
+       <property name="text">
+        <string>Select All</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1" rowspan="2">
+      <widget class="QPushButton" name="pb_Clear">
+       <property name="text">
+        <string>Clear</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="4" rowspan="2">
+      <widget class="QPushButton" name="pb_Eject">
+       <property name="text">
+        <string>Eject selected</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="4" colspan="3">
+      <widget class="QListWidget" name="usbDrives"/>
+     </item>
+     <item row="5" column="4">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Create new folder(s)</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="2">
+      <widget class="QPushButton" name="pushButton">
+       <property name="text">
+        <string>Copy</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="5">
+      <widget class="QRadioButton" name="radio_folder_yes">
+       <property name="text">
+        <string>yes</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0" colspan="2">
+      <widget class="QListWidget" name="listWidget"/>
+     </item>
+     <item row="4" column="5" colspan="2">
+      <widget class="QPushButton" name="pushButton_2">
+       <property name="text">
+        <string>Erase selected</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Input</string>
+       </property>
+       <property name="scaledContents">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="6">
+      <widget class="QRadioButton" name="radio_folder_no">
+       <property name="text">
+        <string>no</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="4">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Output</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QPushButton" name="pb_browse">
+       <property name="text">
+        <string>Browse files</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="4" colspan="3">
+      <widget class="QLineEdit" name="new_folder">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QPushButton" name="pb_browse_folders">
+       <property name="text">
+        <string>Browse folders</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0" colspan="2">
+      <widget class="QLineEdit" name="address_mail"/>
+     </item>
+    </layout>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -229,9 +142,16 @@
      <x>0</x>
      <y>0</y>
      <width>772</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionAbout"/>
+   </widget>
+   <addaction name="menuFile"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -242,6 +162,11 @@
    </attribute>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About the fantastic team</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
