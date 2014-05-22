@@ -126,8 +126,12 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pushButton_clicked()
 {
-
-	_t.start();
+    _t.start();
+	int size = 0;
+	for(int i = 0; i < ui->listWidget->count(); i++) {
+		size += Copier::calcSize(ui->listWidget->item(i)->text());
+	}
+	qDebug() << "Size :" << size;
 
 	for(int i = 0; i < ui->listWidget->count(); i++) {
 		foreach(QListWidgetItem *dest, ui->usbDrives->selectedItems())
@@ -156,11 +160,13 @@ void MainWindow::on_pushButton_clicked()
 			}
 			else
 				dst = dest->text()+ "/" + QFileInfo(ui->listWidget->item(i)->text()).fileName();
+
 			qDebug() << "Copy from" << src << "to" << dst;
 			QThread *thread = new QThread;
 			_nbThreads++;
 
-			Copier * c = new Copier(src, dst);
+
+			Copier * c = new Copier(src, dst, &_p);
 			c->moveToThread(thread);
 			connect(c, SIGNAL(error(QString)), this, SLOT(errorString(QString)));
 			connect(thread, SIGNAL(started()), c, SLOT(process()));
@@ -170,7 +176,7 @@ void MainWindow::on_pushButton_clicked()
 			connect(thread, SIGNAL(finished()), this, SLOT(on_finnish()));
 			_p.addCopy(src, dst);
 			_p.show();
-			thread->start(QThread::HighPriority);
+			thread->start(QThread::HighestPriority);
 		}
 	}
 
@@ -234,31 +240,27 @@ void MainWindow::on_pushButton_2_clicked()
 {
 	foreach(QListWidgetItem *dest, ui->usbDrives->selectedItems())
 	{
+		QString destination = dest->text();
+		qDebug() << "Ask permission for erasing" << destination;
+
 		QMessageBox msgBox;
 		msgBox.setText("Information");
-		msgBox.setInformativeText("Are you sure you want to erase all content on " + dest->text());
+		msgBox.setInformativeText("Are you sure you want to erase all content on " + destination);
 
 		msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
 		msgBox.setDefaultButton(QMessageBox::Cancel);
-		if(msgBox.exec())
+		msgBox.exec();
+		if(msgBox.result() == QDialog::Accepted or msgBox.result() == QMessageBox::Ok)
 		{
-			qDebug() << "Start erasing";
+			qDebug() << "Start erasing" << destination;
+			QMessageBox msgBox;
 
-			QDir folder(dest->text());
-			QStringList files = folder.entryList();
+			Copier::rmDir(destination);
 
-			foreach(QString file, files)
-			{
-				qDebug() << "removing" << file;
-				if(file.length() > 2)
-				{
-					QFile f(dest->text() + "/" + file);
-					if(f.remove())
-						qDebug() << "Removed file" << file;
-				}
-			}
+			msgBox.setText("The volume \"" + destination.split("/").last() + "\" have been erased.");
+			msgBox.exec();
+
 		}
-
 	}
 }
 
