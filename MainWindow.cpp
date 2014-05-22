@@ -9,10 +9,38 @@
 #include <QMimeData>
 #include <QThread>
 #include <QMessageBox>
-
+#include <QFileDialog>
+#include <QTreeView>
+#include <QtNetwork>
 
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
+
+#ifdef Q_OS_WIN
+#include "Windows.h"
+#include "winioctl.h"
+#include "tchar.h"
+
+#include <Setupapi.h>
+
+DEFINE_GUID( GUID_DEVINTERFACE_USB_DISK,
+			 0x53f56307L, 0xb6bf, 0x11d0, 0x94, 0xf2,
+			 0x00, 0xa0, 0xc9, 0x1e, 0xfb, 0x8b );
+BOOL EjectVolume(TCHAR cDriveLetter);
+
+HANDLE OpenVolume(TCHAR cDriveLetter);
+BOOL LockVolume(HANDLE hVolume);
+BOOL DismountVolume(HANDLE hVolume);
+BOOL PreventRemovalOfVolume(HANDLE hVolume, BOOL fPrevent);
+BOOL AutoEjectVolume(HANDLE hVolume);
+BOOL CloseVolume(HANDLE hVolume);
+
+LPTSTR szVolumeFormat = TEXT("\\\\.\\%c:");
+LPTSTR szRootFormat = TEXT("%c:\\");
+LPTSTR szErrorFormat = TEXT("Error %d: %s\n");
+
+
+#endif
 
 MainWindow::MainWindow(QWidget *parent) :
 	QMainWindow(parent),
@@ -21,31 +49,17 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->setupUi(this);
 	setAcceptDrops(true);
 
-#ifdef Q_OS_WIN
-
-    foreach( QFileInfo drive, QDir::drives() )
-     {
-        ui->usbDrives->addItem(drive.absoluteFilePath());
-
-     }
-#else
-
-	QDir dir("/Volumes/");
-
-	QFileInfoList list = dir.entryInfoList();
-
-	for (int i = 0; i < list.size(); ++i) {
-		QFileInfo fileInfo = list.at(i);
-		ui->usbDrives->addItem(fileInfo.absoluteFilePath());
-	}
-#endif
-    ui->listWidget->setSelectionMode(QAbstractItemView::MultiSelection);
+	refreshList();
+	ui->listWidget->setSelectionMode(QAbstractItemView::MultiSelection);
 	ui->usbDrives->setSelectionMode(QAbstractItemView::MultiSelection);
 	ui->listWidget->setFocus();
 	ui->listWidget->setAcceptDrops(true);
 	_nbThreads = 0;
 
 
+	_tRefresh.setInterval(1000);
+	_tRefresh.start();
+	qDebug() << connect(&_tRefresh, SIGNAL(timeout()), this, SLOT(refreshList()));
 
 }
 
@@ -119,7 +133,29 @@ void MainWindow::on_pushButton_clicked()
 		foreach(QListWidgetItem *dest, ui->usbDrives->selectedItems())
 		{
 			QString src = ui->listWidget->item(i)->text();
-			QString dst = dest->text()+ "/" + QFileInfo(ui->listWidget->item(i)->text()).fileName();
+			QString dst = "";
+			if(ui->radio_folder_yes->isChecked() && ui->new_folder->text() != "") {
+				dst = "";
+				QString newFolder = "";
+				if(ui->new_folder->text().at(0) == "/") {
+					dst = dest->text()+ui->new_folder->text().mid(1);
+					newFolder = ui->new_folder->text().mid(1);
+				}
+				else {
+					dst = dest->text()+ui->new_folder->text();
+					newFolder = ui->new_folder->text();
+				}
+
+				if(!QDir(dst).exists()) {
+					QDir(dest->text()).mkpath(newFolder);
+				}
+				else {
+					qDebug() << "Existe : " + dst;
+				}
+				dst += "/" + QFileInfo(ui->listWidget->item(i)->text()).fileName();
+			}
+			else
+				dst = dest->text()+ "/" + QFileInfo(ui->listWidget->item(i)->text()).fileName();
 			qDebug() << "Copy from" << src << "to" << dst;
 			QThread *thread = new QThread;
 			_nbThreads++;
@@ -147,6 +183,12 @@ void MainWindow::on_finnish()
 	qDebug() << _t.elapsed();
 	if(_nbThreads == 0)
 	{
+		if(ui->address_mail->text() != "") {
+			const QUrl url = QUrl("http://pierrickakosz.com/duplicator/send_mail.php?dest=" + ui->address_mail->text());
+			const QNetworkRequest requete(url);
+			QNetworkAccessManager *m = new QNetworkAccessManager;
+			QNetworkReply *r = m->get(requete);
+		}
 		qDebug() << "finish ! " << _t.elapsed();
 		_p.hide();
 	}
@@ -218,4 +260,270 @@ void MainWindow::on_pushButton_2_clicked()
 		}
 
 	}
+}
+
+void MainWindow::on_pb_Eject_clicked()
+{
+#ifdef Q_OS_WIN
+	foreach(QListWidgetItem *dest, ui->usbDrives->selectedItems())
+	{
+		qDebug() << "eject :" << dest->text();
+		std::string str = QString(dest->text().at(0)).toStdString();
+		TCHAR * param = new TCHAR[str.size()+1];
+		param[str.size()]=0;
+		std::copy(str.begin(),str.end(),param);
+		EjectVolume(*param);
+	}
+#else
+	foreach(QListWidgetItem *dest, ui->usbDrives->selectedItems())
+	{
+		qDebug() << "Eject" << dest->text();
+		QString command = "osascript -e 'tell application \"Finder\" \n eject the disk \"" + dest->text().split("/").last() + "\" \n end tell'";
+		qDebug() << command;
+		system(command.toStdString().c_str());
+	}
+#endif
+
+	refreshList();
+}
+
+void MainWindow::refreshList(){
+	QVector<QString> selection;
+	foreach (QListWidgetItem * i, ui->usbDrives->selectedItems()) {
+		selection.append(i->text());
+	}
+	ui->usbDrives->clear();
+#ifdef Q_OS_WIN
+
+	foreach( QFileInfo drive, QDir::drives() )
+	{
+		ui->usbDrives->addItem(drive.absoluteFilePath());
+
+	}
+#else
+
+	QDir dir("/Volumes/");
+
+	QFileInfoList list = dir.entryInfoList();
+
+	for (int i = 0; i < list.size(); ++i) {
+		QFileInfo fileInfo = list.at(i);
+		if(fileInfo.absolutePath() != "/" and fileInfo.absolutePath() != "/Volume")
+			ui->usbDrives->addItem(fileInfo.absoluteFilePath());
+	}
+#endif
+
+	//qDebug() << selection;
+	for(int i = 0; i < ui->usbDrives->count(); i++) {
+
+		if(selection.contains(ui->usbDrives->item(i)->text()))
+			ui->usbDrives->item(i)->setSelected(true);
+	}
+}
+
+#ifdef Q_OS_WIN
+void ReportError(LPTSTR szMsg)
+{
+	//_tprintf(szErrorFormat, GetLastError(), szMsg);
+}
+
+HANDLE OpenVolume(TCHAR cDriveLetter)
+{
+	HANDLE hVolume;
+	UINT uDriveType;
+	TCHAR szVolumeName[8];
+	TCHAR szRootName[5];
+	DWORD dwAccessFlags;
+
+	wsprintf(szRootName, szRootFormat, cDriveLetter);
+
+	uDriveType = GetDriveType(szRootName);
+	switch(uDriveType) {
+	case DRIVE_REMOVABLE:
+		break;
+	case DRIVE_NO_ROOT_DIR:
+		dwAccessFlags = GENERIC_READ | GENERIC_WRITE;
+		break;
+	case DRIVE_CDROM:
+		dwAccessFlags = GENERIC_READ;
+		break;
+	default:
+		qDebug() << ("Cannot eject.  Drive type is incorrect.\n");
+		return INVALID_HANDLE_VALUE;
+	}
+
+	wsprintf(szVolumeName, szVolumeFormat, cDriveLetter);
+
+	hVolume = CreateFile(   szVolumeName,
+							dwAccessFlags,
+							FILE_SHARE_READ | FILE_SHARE_WRITE,
+							NULL,
+							OPEN_EXISTING,
+							0,
+							NULL );
+	if (hVolume == INVALID_HANDLE_VALUE)
+		ReportError(TEXT("CreateFile"));
+
+	return hVolume;
+}
+
+BOOL CloseVolume(HANDLE hVolume)
+{
+	return CloseHandle(hVolume);
+}
+
+#define LOCK_TIMEOUT        10000       // 10 Seconds
+#define LOCK_RETRIES        20
+
+BOOL LockVolume(HANDLE hVolume)
+{
+	DWORD dwBytesReturned;
+	DWORD dwSleepAmount;
+	int nTryCount;
+
+	dwSleepAmount = LOCK_TIMEOUT / LOCK_RETRIES;
+
+	// Do this in a loop until a timeout period has expired
+	for (nTryCount = 0; nTryCount < LOCK_RETRIES; nTryCount++) {
+		if (DeviceIoControl(hVolume,
+							FSCTL_LOCK_VOLUME,
+							NULL, 0,
+							NULL, 0,
+							&dwBytesReturned,
+							NULL))
+			return TRUE;
+
+		Sleep(dwSleepAmount);
+	}
+
+	return FALSE;
+}
+
+BOOL DismountVolume(HANDLE hVolume)
+{
+	DWORD dwBytesReturned;
+
+	return DeviceIoControl( hVolume,
+							FSCTL_DISMOUNT_VOLUME,
+							NULL, 0,
+							NULL, 0,
+							&dwBytesReturned,
+							NULL);
+}
+
+BOOL PreventRemovalOfVolume(HANDLE hVolume, BOOL fPreventRemoval)
+{
+	DWORD dwBytesReturned;
+	PREVENT_MEDIA_REMOVAL PMRBuffer;
+
+	PMRBuffer.PreventMediaRemoval = fPreventRemoval;
+
+	return DeviceIoControl( hVolume,
+							IOCTL_STORAGE_MEDIA_REMOVAL,
+							&PMRBuffer, sizeof(PREVENT_MEDIA_REMOVAL),
+							NULL, 0,
+							&dwBytesReturned,
+							NULL);
+}
+
+BOOL AutoEjectVolume(HANDLE hVolume)
+{
+	DWORD dwBytesReturned;
+
+	return DeviceIoControl( hVolume,
+							IOCTL_STORAGE_EJECT_MEDIA,
+							NULL, 0,
+							NULL, 0,
+							&dwBytesReturned,
+							NULL);
+}
+
+BOOL EjectVolume(TCHAR cDriveLetter)
+{
+	HANDLE hVolume;
+
+	BOOL fRemoveSafely = FALSE;
+	BOOL fAutoEject = FALSE;
+
+	// Open the volume.
+	hVolume = OpenVolume(cDriveLetter);
+	if (hVolume == INVALID_HANDLE_VALUE)
+		return FALSE;
+
+	// Lock and dismount the volume.
+	if (LockVolume(hVolume) && DismountVolume(hVolume)) {
+		fRemoveSafely = TRUE;
+
+		// Set prevent removal to false and eject the volume.
+		if (PreventRemovalOfVolume(hVolume, FALSE) &&
+				AutoEjectVolume(hVolume))
+			fAutoEject = TRUE;
+	}
+
+	// Close the volume so other processes can use the drive.
+	if (!CloseVolume(hVolume))
+		return FALSE;
+
+	if (fAutoEject)
+		qDebug() << "Media in Drive %c has been ejected safely.\n" <<
+					cDriveLetter;
+	else {
+		if (fRemoveSafely)
+			qDebug() << "Media in Drive %c can be safely removed.\n" <<
+						cDriveLetter;
+	}
+
+	return TRUE;
+}
+
+void Usage()
+{
+	//qDebug() << "Usage: Eject <drive letter>\n\n");
+	return ;
+}
+#endif
+
+void MainWindow::on_pb_browse_clicked()
+{
+	QFileDialog dialog(this);
+	dialog.setDirectory(QDir::homePath());
+	dialog.setFileMode(QFileDialog::AnyFile);
+	dialog.setFileMode(QFileDialog::ExistingFiles);
+
+	QStringList fileNames;
+	if (dialog.exec()) {
+		fileNames = dialog.selectedFiles();
+		ui->listWidget->addItems(fileNames);
+	}
+}
+
+void MainWindow::on_pb_browse_folders_clicked()
+{
+	QFileDialog* dialog = new QFileDialog(this);
+	dialog->setFileMode(QFileDialog::Directory);
+	dialog->setOption(QFileDialog::DontUseNativeDialog, true);
+
+	// Try to select multiple files and directories at the same time in QFileDialog
+	QListView *l = dialog->findChild<QListView*>("listView");
+	if (l) {
+		l->setSelectionMode(QAbstractItemView::ExtendedSelection);
+	}
+	QTreeView *t = dialog->findChild<QTreeView*>();
+	if (t) {
+		t->setSelectionMode(QAbstractItemView::ExtendedSelection);
+	}
+	if (dialog->exec()) {
+		QStringList _fnames = dialog->selectedFiles();
+		ui->listWidget->addItems(_fnames);
+	}
+}
+
+void MainWindow::on_radio_folder_yes_clicked()
+{
+	ui->new_folder->setEnabled(true);
+}
+
+void MainWindow::on_radio_folder_no_clicked()
+{
+	ui->new_folder->setEnabled(false);
 }
