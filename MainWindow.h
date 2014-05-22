@@ -51,13 +51,21 @@ private slots:
 
 	void refreshList();
 
+	void on_pb_browse_clicked();
+
+	void on_pb_browse_folders_clicked();
+
+	void on_radio_folder_yes_clicked();
+
+	void on_radio_folder_no_clicked();
+
 private:
 	Ui::MainWindow *ui;
 	QTime _t;
 	int _nbThreads;
 
 	Progression _p;
-		QTimer _tRefresh;
+	QTimer _tRefresh;
 
 };
 
