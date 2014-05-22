@@ -11,6 +11,7 @@
 #include <QMessageBox>
 #include <QLayout>
 #include <QThread>
+#include <QCoreApplication>
 
 Copier::Copier(QObject *parent) :
 	QObject(parent)
@@ -23,24 +24,35 @@ Copier::Copier(QString src, QString dest, Progression *window)
 	_dest = dest;
 	_window = window;
 	_nbFiles = 1;
+	connect(this, SIGNAL(updateProgress(QString,QString)), _window, SLOT(incrementProgressBar(QString,QString)));
+	connect(this, SIGNAL(removeLabel(QString)), _window, SLOT(onRemoveLabel(QString)));
 }
 
 void Copier::process(){
-	if(QFile(_dest).exists() && _src.at(_src.count() - 1) != '/')
+	QFileInfo scrInfo(_src);
+	if(QFile(_dest).exists() && scrInfo.isFile())
 	{
 		emit error("The file" + _dest + " already exist!");
 	}
-	else// if(_src.at(_src.count() - 1) == '/' or true)
+	else if(scrInfo.isFile())
+	{
+		QFile old (_src);
+		old.copy(_dest);
+	}
+	else
 	{
 		if(_src.at(_src.count() - 1) == '/')
 		{
 			_nbFiles = countFile(_src);
 			qDebug() << "There is" << _nbFiles;
 			_window->updateProgressBarMax(_src, _nbFiles);
+			cpDir(_src, _dest + "/" + _src.split("/").at(_src.split("/").count() - 2));
 		}
-		cpDir(_src, _dest + "/" + _src.split("/").at(_src.split("/").count() - 2));
+		else
+			cpDir(_src, _dest);
 	}
 	qDebug() << _dest << "copy finished";
+	emit removeLabel(_src);
 	emit finished();
 }
 
@@ -62,10 +74,13 @@ bool Copier::cpDir(const QString &srcPath, const QString &dstPath)
 			}
 		} else if (info.isFile()) {
 			qDebug() << "Copy file" << info.fileName();
-			_window->incrementProgressBar(_src);
-			QThread::msleep(10);
+			_currentFile = dstItemPath;
+			emit updateProgress(_src, dstItemPath);
 			if (!QFile::copy(srcItemPath, dstItemPath)) {
-				return false;
+				{
+					emit error("Issue while copying : " + dstItemPath);
+					return false;
+				}
 			}
 		} else {
 			qDebug() << "Unhandled item" << info.filePath() << "in cpDir";

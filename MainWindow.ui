@@ -46,6 +46,9 @@
     <property name="text">
      <string>Input</string>
     </property>
+    <property name="scaledContents">
+     <bool>true</bool>
+    </property>
    </widget>
    <widget class="QLabel" name="label_2">
     <property name="geometry">

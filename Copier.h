@@ -23,6 +23,8 @@ public:
 signals:
 	void finished();
 	void error(QString);
+	void updateProgress(QString, QString);
+	void removeLabel(QString);
 
 
 public slots:
@@ -38,6 +40,7 @@ private:
 	bool cpDir(const QString &srcPath, const QString &dstPath);
 	int countFile(const QString &path, bool countDirs = false);
 
+	QString _currentFile;
 	int _nbFiles;
 };
 

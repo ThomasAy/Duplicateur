@@ -29,9 +29,11 @@ public:
 
 	void updateProgressBarMax(QString file, qint64 pos);
 
-	void incrementProgressBar(QString file);
 public slots:
-	void updateProgressBar(QString file, qint64 pos);
+	void incrementProgressBar(QString file, QString currentFile = "");
+
+	void updateProgressBar(QString file, qint64 pos, QString currentFile = "");
+	void onRemoveLabel(QString name);
 private:
 	Ui::Progression *ui;
 	QVBoxLayout *vbl;
