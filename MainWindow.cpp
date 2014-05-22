@@ -125,29 +125,34 @@ void MainWindow::on_pushButton_clicked()
 {
 
     _t.start();
+	int size = 0;
+	for(int i = 0; i < ui->listWidget->count(); i++) {
+		size += Copier::calcSize(ui->listWidget->item(i)->text());
+	}
+	qDebug() << "Size :" << size;
 
-    for(int i = 0; i < ui->listWidget->count(); i++) {
-        foreach(QListWidgetItem *dest, ui->usbDrives->selectedItems())
-        {
-            QString src = ui->listWidget->item(i)->text();
-            QString dst = dest->text()+ "/" + QFileInfo(ui->listWidget->item(i)->text()).fileName();
-            qDebug() << "Copy from" << src << "to" << dst;
-            QThread *thread = new QThread;
-            _nbThreads++;
+	for(int i = 0; i < ui->listWidget->count(); i++) {
+		foreach(QListWidgetItem *dest, ui->usbDrives->selectedItems())
+		{
+			QString src = ui->listWidget->item(i)->text();
+			QString dst = dest->text()+ "/" + QFileInfo(ui->listWidget->item(i)->text()).fileName();
+			qDebug() << "Copy from" << src << "to" << dst;
+			QThread *thread = new QThread;
+			_nbThreads++;
 
-            Copier * c = new Copier(src, dst);
-            c->moveToThread(thread);
-            connect(c, SIGNAL(error(QString)), this, SLOT(errorString(QString)));
-            connect(thread, SIGNAL(started()), c, SLOT(process()));
-            connect(c, SIGNAL(finished()), thread, SLOT(quit()));
-            connect(c, SIGNAL(finished()), c, SLOT(deleteLater()));
-            connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-            connect(thread, SIGNAL(finished()), this, SLOT(on_finnish()));
-            _p.addCopy(src, dst);
-            _p.show();
-            thread->start(QThread::HighPriority);
-        }
-    }
+			Copier * c = new Copier(src, dst, &_p);
+			c->moveToThread(thread);
+			connect(c, SIGNAL(error(QString)), this, SLOT(errorString(QString)));
+			connect(thread, SIGNAL(started()), c, SLOT(process()));
+			connect(c, SIGNAL(finished()), thread, SLOT(quit()));
+			connect(c, SIGNAL(finished()), c, SLOT(deleteLater()));
+			connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+			connect(thread, SIGNAL(finished()), this, SLOT(on_finnish()));
+			_p.addCopy(src, dst);
+			_p.show();
+			thread->start(QThread::HighestPriority);
+		}
+	}
 
 
 }
@@ -201,34 +206,30 @@ void MainWindow::errorString(QString str)
 
 void MainWindow::on_pushButton_2_clicked()
 {
-    foreach(QListWidgetItem *dest, ui->usbDrives->selectedItems())
-    {
-        QMessageBox msgBox;
-        msgBox.setText("Information");
-        msgBox.setInformativeText("Are you sure you want to erase all content on " + dest->text());
+	foreach(QListWidgetItem *dest, ui->usbDrives->selectedItems())
+	{
+		QString destination = dest->text();
+		qDebug() << "Ask permission for erasing" << destination;
 
-        msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-        msgBox.setDefaultButton(QMessageBox::Cancel);
-        if(msgBox.exec())
-        {
-            qDebug() << "Start erasing";
+		QMessageBox msgBox;
+		msgBox.setText("Information");
+		msgBox.setInformativeText("Are you sure you want to erase all content on " + destination);
 
-            QDir folder(dest->text());
-            QStringList files = folder.entryList();
+		msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+		msgBox.setDefaultButton(QMessageBox::Cancel);
+		msgBox.exec();
+		if(msgBox.result() == QDialog::Accepted or msgBox.result() == QMessageBox::Ok)
+		{
+			qDebug() << "Start erasing" << destination;
+			QMessageBox msgBox;
 
-            foreach(QString file, files)
-            {
-                qDebug() << "removing" << file;
-                if(file.length() > 2)
-                {
-                    QFile f(dest->text() + "/" + file);
-                    if(f.remove())
-                        qDebug() << "Removed file" << file;
-                }
-            }
-        }
+			Copier::rmDir(destination);
 
-    }
+			msgBox.setText("The volume \"" + destination.split("/").last() + "\" have been erased.");
+			msgBox.exec();
+
+		}
+	}
 }
 
 void MainWindow::on_pb_Eject_clicked()
