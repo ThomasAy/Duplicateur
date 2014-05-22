@@ -9,90 +9,130 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>772</width>
-    <height>603</height>
+    <width>644</width>
+    <height>530</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>EasyKey by G4</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QWidget" name="">
+   <property name="styleSheet">
+    <string notr="true">QGridLayout { 
+
+	background: #E6E6E6;
+	
+}
+
+
+QPushButton {
+
+	color : white;
+	background: #878787;
+	border-radius: 5px;
+	height: 20px;
+	width: 50px;
+
+}
+
+
+QPushButton:hover {
+
+	background: #B8B9B9;
+
+}
+
+QLabel {
+
+	color : black;
+	font-family: &quot;helvetica&quot;, &quot;arial&quot;;
+	font-weight: lighter;
+
+}
+
+
+QListWidget {
+
+	alternate-background-color: #B0B0B0;
+	background: white;
+	color: black;
+	text-align: center;
+	border-radius: 5px;
+
+}
+
+QLineEdit {
+	border-radius: 5px;
+}
+
+QWidget {
+	font-family: &quot;helvetica&quot;, &quot;arial&quot;;
+	font-weight: lighter;
+}
+</string>
+   </property>
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>10</y>
-      <width>731</width>
-      <height>531</height>
+      <y>110</y>
+      <width>601</width>
+      <height>361</height>
      </rect>
     </property>
     <layout class="QGridLayout" name="gridLayout">
-     <item row="2" column="5" rowspan="2" colspan="2">
-      <widget class="QPushButton" name="pb_Select">
-       <property name="text">
-        <string>Select All</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1" rowspan="2">
-      <widget class="QPushButton" name="pb_Clear">
-       <property name="text">
-        <string>Clear</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="4" rowspan="2">
+     <item row="4" column="4">
       <widget class="QPushButton" name="pb_Eject">
        <property name="text">
         <string>Eject selected</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="4" colspan="3">
-      <widget class="QListWidget" name="usbDrives"/>
-     </item>
-     <item row="5" column="4">
-      <widget class="QLabel" name="label_3">
+     <item row="4" column="5" colspan="2">
+      <widget class="QPushButton" name="pb_Select">
        <property name="text">
-        <string>Create new folder(s)</string>
+        <string>Select All</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="2">
-      <widget class="QPushButton" name="pushButton">
-       <property name="text">
-        <string>Copy</string>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="5">
+     <item row="8" column="5">
       <widget class="QRadioButton" name="radio_folder_yes">
        <property name="text">
         <string>yes</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="0" colspan="2">
-      <widget class="QListWidget" name="listWidget"/>
-     </item>
-     <item row="4" column="5" colspan="2">
+     <item row="6" column="5" colspan="2">
       <widget class="QPushButton" name="pushButton_2">
        <property name="text">
         <string>Erase selected</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Input</string>
+     <item row="7" column="4">
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
        </property>
-       <property name="scaledContents">
-        <bool>true</bool>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>0</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="9" column="0" colspan="2">
+      <widget class="QLineEdit" name="address_mail"/>
+     </item>
+     <item row="8" column="4">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Create new folder(s)</string>
        </property>
       </widget>
      </item>
-     <item row="5" column="6">
+     <item row="8" column="6">
       <widget class="QRadioButton" name="radio_folder_no">
        <property name="text">
         <string>no</string>
@@ -102,38 +142,102 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="4">
+     <item row="2" column="2">
+      <widget class="QPushButton" name="pushButton">
+       <property name="text">
+        <string>Copy</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="4" colspan="3">
+      <widget class="QListWidget" name="usbDrives">
+       <property name="alternatingRowColors">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Input</string>
+       </property>
+       <property name="scaledContents">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0" colspan="2">
+      <widget class="QListWidget" name="listWidget">
+       <property name="alternatingRowColors">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="4">
       <widget class="QLabel" name="label_2">
        <property name="text">
         <string>Output</string>
        </property>
       </widget>
      </item>
-     <item row="2" column="0">
-      <widget class="QPushButton" name="pb_browse">
-       <property name="text">
-        <string>Browse files</string>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="4" colspan="3">
+     <item row="9" column="4" colspan="3">
       <widget class="QLineEdit" name="new_folder">
        <property name="enabled">
         <bool>false</bool>
        </property>
       </widget>
      </item>
-     <item row="4" column="0">
+     <item row="6" column="0">
       <widget class="QPushButton" name="pb_browse_folders">
        <property name="text">
         <string>Browse folders</string>
        </property>
       </widget>
      </item>
-     <item row="5" column="0" colspan="2">
-      <widget class="QLineEdit" name="address_mail"/>
+     <item row="4" column="0">
+      <widget class="QPushButton" name="pb_browse">
+       <property name="text">
+        <string>Browse files</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <widget class="QPushButton" name="pb_Clear">
+       <property name="text">
+        <string>Clear</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <spacer name="verticalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
+   </widget>
+   <widget class="QLabel" name="logo">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>0</y>
+      <width>251</width>
+      <height>111</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap resource="ressource.qrc">:/images/images/logo.png</pixmap>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -141,8 +245,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>772</width>
-     <height>22</height>
+     <width>644</width>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -169,6 +273,8 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="ressource.qrc"/>
+ </resources>
  <connections/>
 </ui>

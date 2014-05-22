@@ -25,3 +25,5 @@ HEADERS  += MainWindow.h \
 
 FORMS    += MainWindow.ui \
     Progression.ui
+
+RESOURCES += ressource.qrc
