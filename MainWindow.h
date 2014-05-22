@@ -29,7 +29,7 @@ public:
 	~MainWindow();
 
 protected :
-	bool eventFilter(QObject *sender, QEvent *event);
+	bool eventFilter(QObject *, QEvent *event);
 	void dropEvent(QDropEvent *event);
 	void dragEnterEvent(QDragEnterEvent *e);
 private slots:

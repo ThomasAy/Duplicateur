@@ -8,6 +8,10 @@
 
 #include <QWidget>
 #include <QVBoxLayout>
+#include <QMap>
+
+#include <QLabel>
+#include <QProgressBar>
 
 namespace Ui {
 class Progression;
@@ -21,10 +25,19 @@ public:
 	explicit Progression(QWidget *parent = 0);
 	~Progression();
 
-	void addCopy(QString src, QString dest);
+	void addCopy(QString src, QString);
+
+	void updateProgressBarMax(QString file, qint64 pos);
+
+public slots:
+	void incrementProgressBar(QString file, QString currentFile = "");
+
+	void updateProgressBar(QString file, qint64 pos, QString currentFile = "");
+	void onRemoveLabel(QString name);
 private:
 	Ui::Progression *ui;
 	QVBoxLayout *vbl;
+	QMap<QString, QProgressBar *> ProgressBars;
 };
 
 #endif // PROGRESSION_H

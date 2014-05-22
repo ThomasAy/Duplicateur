@@ -13,6 +13,7 @@
 #include <QTreeView>
 #include <QtNetwork>
 
+
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 
@@ -27,6 +28,7 @@ DEFINE_GUID( GUID_DEVINTERFACE_USB_DISK,
 			 0x53f56307L, 0xb6bf, 0x11d0, 0x94, 0xf2,
 			 0x00, 0xa0, 0xc9, 0x1e, 0xfb, 0x8b );
 BOOL EjectVolume(TCHAR cDriveLetter);
+
 
 HANDLE OpenVolume(TCHAR cDriveLetter);
 BOOL LockVolume(HANDLE hVolume);
@@ -56,7 +58,6 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->listWidget->setAcceptDrops(true);
 	_nbThreads = 0;
 
-
 	_tRefresh.setInterval(1000);
 	_tRefresh.start();
 	qDebug() << connect(&_tRefresh, SIGNAL(timeout()), this, SLOT(refreshList()));
@@ -69,7 +70,7 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *e)
 		e->acceptProposedAction();
 	}
 }
-bool MainWindow::eventFilter(QObject * sender, QEvent *event)
+bool MainWindow::eventFilter(QObject *, QEvent *event)
 {
 	qDebug() << event->type();
 	/// The event filter catch the following event:
@@ -126,7 +127,9 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pushButton_clicked()
 {
-    _t.start();
+
+	_t.start();
+
 	int size = 0;
 	for(int i = 0; i < ui->listWidget->count(); i++) {
 		size += Copier::calcSize(ui->listWidget->item(i)->text());
@@ -141,7 +144,7 @@ void MainWindow::on_pushButton_clicked()
 			if(ui->radio_folder_yes->isChecked() && ui->new_folder->text() != "") {
 				dst = "";
 				QString newFolder = "";
-				if(ui->new_folder->text().at(0) == "/") {
+				if(ui->new_folder->text().at(0) == '/') {
 					dst = dest->text()+ui->new_folder->text().mid(1);
 					newFolder = ui->new_folder->text().mid(1);
 				}
@@ -161,10 +164,10 @@ void MainWindow::on_pushButton_clicked()
 			else
 				dst = dest->text()+ "/" + QFileInfo(ui->listWidget->item(i)->text()).fileName();
 
+
 			qDebug() << "Copy from" << src << "to" << dst;
 			QThread *thread = new QThread;
 			_nbThreads++;
-
 
 			Copier * c = new Copier(src, dst, &_p);
 			c->moveToThread(thread);
@@ -177,6 +180,7 @@ void MainWindow::on_pushButton_clicked()
 			_p.addCopy(src, dst);
 			_p.show();
 			thread->start(QThread::HighestPriority);
+
 		}
 	}
 
@@ -193,7 +197,7 @@ void MainWindow::on_finnish()
 			const QUrl url = QUrl("http://pierrickakosz.com/duplicator/send_mail.php?dest=" + ui->address_mail->text());
 			const QNetworkRequest requete(url);
 			QNetworkAccessManager *m = new QNetworkAccessManager;
-			QNetworkReply *r = m->get(requete);
+			m->get(requete);
 		}
 		qDebug() << "finish ! " << _t.elapsed();
 		_p.hide();
@@ -247,6 +251,7 @@ void MainWindow::on_pushButton_2_clicked()
 		msgBox.setText("Information");
 		msgBox.setInformativeText("Are you sure you want to erase all content on " + destination);
 
+
 		msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
 		msgBox.setDefaultButton(QMessageBox::Cancel);
 		msgBox.exec();
@@ -258,6 +263,7 @@ void MainWindow::on_pushButton_2_clicked()
 			Copier::rmDir(destination);
 
 			msgBox.setText("The volume \"" + destination.split("/").last() + "\" have been erased.");
+
 			msgBox.exec();
 
 		}
@@ -289,7 +295,8 @@ void MainWindow::on_pb_Eject_clicked()
 	refreshList();
 }
 
-void MainWindow::refreshList(){
+void MainWindow::refreshList()
+{
 	QVector<QString> selection;
 	foreach (QListWidgetItem * i, ui->usbDrives->selectedItems()) {
 		selection.append(i->text());
@@ -297,11 +304,10 @@ void MainWindow::refreshList(){
 	ui->usbDrives->clear();
 #ifdef Q_OS_WIN
 
-	foreach( QFileInfo drive, QDir::drives() )
-	{
-		ui->usbDrives->addItem(drive.absoluteFilePath());
-
-	}
+    foreach( QFileInfo drive, QDir::drives() )
+    {
+        ui->usbDrives->addItem(drive.absoluteFilePath());
+    }
 #else
 
 	QDir dir("/Volumes/");
@@ -485,6 +491,7 @@ void Usage()
 }
 #endif
 
+
 void MainWindow::on_pb_browse_clicked()
 {
 	QFileDialog dialog(this);
@@ -529,3 +536,4 @@ void MainWindow::on_radio_folder_no_clicked()
 {
 	ui->new_folder->setEnabled(false);
 }
+

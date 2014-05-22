@@ -7,28 +7,41 @@
 #define COPIER_H
 
 #include <QObject>
-#include <QProgressBar>
+
+#include <Progression.h>
 
 class Copier : public QObject
 {
 	Q_OBJECT
 public:
 	explicit Copier(QObject *parent = 0);
-	Copier(QString src, QString dest);
+	Copier(QString src, QString dest, Progression * window);
+
+	static bool rmDir(const QString &dirPath);
+	static int calcSize(const QString &dirPath);
 
 signals:
 	void finished();
 	void error(QString);
+	void updateProgress(QString, QString);
+	void removeLabel(QString);
 
 
 public slots:
 	void process();
 
+private slots:
+	void update(qint64 pos);
 private:
 	QString _src;
 	QString _dest;
 
+	Progression * _window;
+	bool cpDir(const QString &srcPath, const QString &dstPath);
+	int countFile(const QString &path, bool = false);
 
+	QString _currentFile;
+	int _nbFiles;
 };
 
 #endif // COPIER_H
