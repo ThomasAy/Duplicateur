@@ -130,11 +130,99 @@ void MainWindow::on_pushButton_clicked()
 
 	_t.start();
 
-	int size = 0;
+	qlonglong size = 0;
 	for(int i = 0; i < ui->listWidget->count(); i++) {
-		size += Copier::calcSize(ui->listWidget->item(i)->text());
+		QFileInfo f(ui->listWidget->item(i)->text());
+		if(f.isDir())
+			size += Copier::calcSize(ui->listWidget->item(i)->text());
+		else
+			size += QFile(f.absoluteFilePath()).size();
 	}
 	qDebug() << "Size :" << size;
+	QStringList listOfDrives;
+	foreach(QListWidgetItem *dest, ui->usbDrives->selectedItems())
+	{
+		listOfDrives.append(dest->text());
+	}
+	QStringList devToCheck;
+
+
+#ifndef Q_OS_WIN
+	QProcess p1;
+	p1.start("diskutil",QStringList() << "list");
+	p1.waitForFinished();
+
+	QStringList outputCommand;
+	foreach(QString line, QString(p1.readAll()).split("\n"))
+		outputCommand.append(line);
+
+
+	foreach (QString line, outputCommand) {
+		foreach (QString device, listOfDrives) {
+			if(line.contains(device.split("/Volumes/").last()))
+				devToCheck.append(line.split(" ").last());
+		}
+	}
+#endif
+
+#ifdef Q_OS_WIN
+	devToCheck = listOfDrives;
+#endif
+
+	QStringList deviceWithNotEnoughPlace;
+	foreach(QString device, devToCheck)
+	{
+		QProcess p;
+#ifndef Q_OS_WIN
+		p.start("diskutil",QStringList() << "info" << device);
+#else
+		p.start("fsutil", QStringList() << "volume diskfree" << device);
+#endif
+		p.waitForFinished();
+		foreach(QString line, QString(p.readAll()).split("\n"))
+		{
+#ifndef Q_OS_WIN
+			if(line.contains("Volume Free Space:"))
+			{
+				if(line.split("(").at(1).split(" ").first().toLongLong() < size);
+				{
+					qDebug() << "The device" << device << "has only" << line.split("(").at(1).split(" ").first() << "bytes left";
+					qDebug() << (line.split("(").at(1).split(" ").first().toLongLong() < size) << line.split("(").at(1).split(" ").first() << size;
+					deviceWithNotEnoughPlace += device;
+				}
+			}
+#else
+			if(line.contains("disponibles"))
+			{
+				if(line.split(":").last().toLongLong() < size);
+				{
+					qDebug() << "The device" << device << "has only" << line.split(":").last().toLongLong() << "bytes left";
+					deviceWithNotEnoughPlace += device;
+				}
+			}
+#endif
+		}
+	}
+
+	if(!deviceWithNotEnoughPlace.isEmpty())
+	{
+		QMessageBox msg;
+		QString message = "Not enough space on the following device(s) : ";
+		foreach (QString s, deviceWithNotEnoughPlace) {
+			message += "\n" + s;
+		}
+		message += "\nCopy have been aborted.";
+		msg.setText(QString(message));
+		msg.setStandardButtons(QMessageBox::Ok);
+		msg.setButtonText(QMessageBox::Ok, "Oups...");
+		msg.setDefaultButton(QMessageBox::Ok);
+		msg.exec();
+		return;
+	}
+
+
+
+
 
 	for(int i = 0; i < ui->listWidget->count(); i++) {
 		foreach(QListWidgetItem *dest, ui->usbDrives->selectedItems())
@@ -304,10 +392,10 @@ void MainWindow::refreshList()
 	ui->usbDrives->clear();
 #ifdef Q_OS_WIN
 
-    foreach( QFileInfo drive, QDir::drives() )
-    {
-        ui->usbDrives->addItem(drive.absoluteFilePath());
-    }
+	foreach( QFileInfo drive, QDir::drives() )
+	{
+		ui->usbDrives->addItem(drive.absoluteFilePath());
+	}
 #else
 
 	QDir dir("/Volumes/");
