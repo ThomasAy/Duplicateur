@@ -174,9 +174,9 @@ void MainWindow::on_pushButton_clicked()
 	{
 		QProcess p;
 #ifndef Q_OS_WIN
-		p.start("diskutil",QStringList() << "info" << device);
+        p.start("diskutil", QStringList() << "info" << device);
 #else
-		p.start("fsutil", QStringList() << "volume diskfree" << device);
+        p.start("fsutil", QStringList() << "volume" << "diskfree" << device);
 #endif
 		p.waitForFinished();
 		foreach(QString line, QString(p.readAll()).split("\n"))
@@ -192,6 +192,7 @@ void MainWindow::on_pushButton_clicked()
 				}
 			}
 #else
+            qDebug() << "Line --->" << line;
 			if(line.contains("disponibles"))
 			{
 				if(line.split(":").last().toLongLong() < size);
